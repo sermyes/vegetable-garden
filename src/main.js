@@ -2,6 +2,8 @@
 
 import { CountUp } from '../dist/countUp.min.js';
 import RankRepository from '../service/rank_repository.js';
+import { fadeIn, fadeOut } from './fade.js';
+import { Field } from './field.js';
 import * as sound from './sound.js';
 
 const startScreen = document.querySelector(".game__startScreen");
@@ -23,13 +25,10 @@ const popUp_btnIcon = document.querySelector('.fas');
 const stanByCounter = document.querySelector('.stanBy__counter');
 
 const rankList = document.querySelector('.rank__list');
-const field = document.querySelector('.play__field');
 const loadingScreen = document.querySelector('.loading');
+const playField = document.querySelector('.play__field');
 
 const STANBY_TIME = 5;
-const VEGETABLE_SIZE = 70;
-const FIELD_WIDTH = 800;
-const FIELD_HEIGHT = 250
 const ITEM_SCORE = 100;
 const TIME_SCORE = 12;
 
@@ -56,8 +55,7 @@ const LEVEL = {
 }
 
 let start = false;
-let fadeOutTimerId;
-let fadeInTimerId;
+
 let stanByTimerId;
 let timerId;
 let removeItemCount;
@@ -75,10 +73,24 @@ window.addEventListener('load', () => {
     hideLoading();
 })
 
-field.addEventListener('click', onItemClick);
+const field = new Field(LEVEL, user);
 popUp_btnIcon.addEventListener('click',onPopUpClick);
 startBtn.addEventListener("click", startGame);
 scoreUp.start();
+
+field.setClickListener(onItemClick);
+
+function onItemClick(itemType){
+    if(itemType === 'vegetable'){
+        sound.playVegetable();
+        updateCountText();
+        updateScoreText(ITEM_SCORE);
+    }else{
+        sound.playBug();
+        clearInterval(timerId);
+        finishGame(0, 'Game End : Bug Catch !');
+    }
+}
 
 function updateRankText(){
     rankList.innerHTML = '';
@@ -179,7 +191,7 @@ function init(){
 }
 
 function finishGame(result, msg){
-    start = false;
+    field.stop(false);
     showFinishPopUp();
     if(result && user.level !== 3){
         showFinishPopUpText(msg, 'next');
@@ -251,29 +263,18 @@ function addTimeScore(){
 }
 
 function showFinishPopUp(){
-    field.style.pointerEvents = 'none';
+    playField.style.pointerEvents = 'none';
     popUp.style.display= 'block';
     popUp_finish.style.display = 'block';
 }
 
 function hideFinishPopUp(){
-    field.style.pointerEvents = 'visible';
+    playField.style.pointerEvents = 'visible';
     popUp.style.display= 'none';
     popUp_finish.style.display = 'none';
 }
 
-function onItemClick(e){
-    if(e.target.getAttribute('class') === 'vegetable'){
-        e.target.remove();
-        updateCountText();
-        updateScoreText(ITEM_SCORE);
-    }else if(e.target.getAttribute('class') === 'bug'){
-        clearInterval(timerId);
-        finishGame(0, 'Game End : Bug Catch !');
-    }else{
-        return;
-    }
-}
+
 
 function playTimer(){
     remainingTime = LEVEL[user.level].TIMEOUT;
@@ -306,24 +307,10 @@ function updateGameInfo(){
     info_count.textContent = LEVEL[user.level].VEGETABLE_COUNT;
     updateTimerText(LEVEL[user.level].TIMEOUT);
     removeItemCount = 0;
-    field.innerHTML = '';
-
-    const vegetableCount = divideItem(LEVEL[user.level].VEGETABLE_COUNT, 3);
-    addItem('vegetable', vegetableCount[0], '../images/vegetable1.png');
-    addItem('vegetable', vegetableCount[1], '../images/vegetable2.png');
-    addItem('vegetable', vegetableCount[2], '../images/vegetable3.png');
-    addItem('bug', LEVEL[user.level].BUG_COUNT, 'images/bug.png');
+    field.init();
 }
 
-function divideItem(itemCount, types){
-    let count = Math.floor(itemCount / types);
-    let countArr = Array(types).fill(count);
 
-    for(let i = 0; i < (itemCount % types); i++){
-        countArr[i] += 1;
-    }
-    return countArr;
-}
 
 function updateTimerText(time){
     let min = Math.floor(time / 60);
@@ -337,44 +324,9 @@ function updateTimerText(time){
     info_timeout.textContent = `${min}:${sec}`;
 }
 
-function addItem(item, count, src){
-    const x1 = 0;
-    const x2 = FIELD_WIDTH - VEGETABLE_SIZE;
-    const y1 = 0;
-    const y2 = FIELD_HEIGHT - VEGETABLE_SIZE;
 
-    for(let i = 0; i < count; i++){
-        const img = document.createElement('img');
-        img.classList.add(item);
-        img.setAttribute('src', src);
-        img.style.position = 'absolute';
-        let x = randomNumber(x1, x2);
-        let y = randomNumber(y1, y2);
-        img.style.left = `${x}px`;
-        img.style.top = `${y}px`; 
-        
-        if(user.level === 2 || user.level === 3){
-            let duration = user.level === 2 ? 3000 : 1500;
-            let moveTimerId = setInterval(() => {
-                let x = randomNumber(x1, x2);
-                let y = randomNumber(y1, y2);
-                img.style.left = `${x}px`;
-                img.style.top = `${y}px`;
 
-                if(start === false){
-                    clearInterval(moveTimerId);
-                }
-            }, duration);
-        }
-                
-        
-        field.appendChild(img);
-    }
-}
 
-function randomNumber(min, max){
-   return Math.floor((Math.random() * (max - min)) + min);
-}
 
 function hideLoading(){
     loading();
@@ -414,7 +366,7 @@ function userInfoInit(){
 
 function playStanByTimer(){
     let timeout = STANBY_TIME;
-    field.style.pointerEvents = 'none';
+    playField.style.pointerEvents = 'none';
     popUp.style.display = 'block';
     popUp_stanBy.style.display = 'block';
 
@@ -424,7 +376,7 @@ function playStanByTimer(){
             stanByCounter.textContent = timeout;
         }else{
             clearInterval(stanByTimerId);
-            field.style.pointerEvents = 'visible';
+            playField.style.pointerEvents = 'visible';
             popUp.style.display = 'none';
             popUp_stanBy.style.display = 'none';
             playTimer();
@@ -444,39 +396,6 @@ function updateUserInfo(){
     userLevel.textContent = user.level;
     
     stanByCounter.textContent = STANBY_TIME;
-}
-
-function fadeOut(element){
-    let opacity = 1;
-    element.style.opacity = opacity;
-
-    fadeOutTimerId = setInterval(() => {
-        if (opacity > 0) {
-            opacity -= 0.1;
-            element.style.opacity = opacity;
-        } else {
-            element.style.display = "none";
-            element.style.visibility = 'hidden';
-            clearInterval(fadeOutTimerId);
-        }
-    }, 100);
-    
-}
-
-function fadeIn(element, option){
-    let opacity = 0;
-    element.style.display = option;
-    element.style.opacity = opacity;
-    element.style.visibility = 'visible';
-
-    fadeInTimerId = setInterval(() => {
-        if (opacity < 1) {
-            opacity += 0.1;
-            element.style.opacity = opacity;
-        } else {
-            clearInterval(fadeInTimerId);
-        }
-    }, 100);
 }
 
 function loading(){
