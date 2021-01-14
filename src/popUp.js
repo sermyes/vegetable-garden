@@ -1,3 +1,15 @@
+export const Progress = Object.freeze({
+    next: 'next',
+    final: 'final',
+    stop: 'stop,'
+});
+
+const ProgressMsg = Object.freeze({
+    next: 'Next Level',
+    final: 'final Score:',
+    stop: 'Score:',
+});
+
 const STANBY_TIME = 5;
 const TIME_SCORE = 20;
 
@@ -40,27 +52,27 @@ export class PopUp{
         this.remainingTime = remainingTime;
     }
 
-    showFinishText(msg, nextMsg){
+    showFinishText(msg, progress){
         this.showFinish();
         this.popUp_finishMsg.textContent = msg;
-        switch(nextMsg){
-            case 'next':
+        switch(progress){
+            case Progress.next:
                 this.user.level++;
                 this.user.score += this.remainingTime * TIME_SCORE;
-                this.popUp_nextMsg.textContent = `Next Level ${this.user.level}`;
+                this.popUp_nextMsg.textContent = `${ProgressMsg.next} ${this.user.level}`;
                 this.popUp_btnIcon.classList.remove('fa-undo'); 
                 this.popUp_btnIcon.classList.remove('fa-stop'); 
                 this.popUp_btnIcon.classList.add('fa-play'); 
                 break;
-            case 'final':
+            case Progress.final:
                 this.user.score += this.remainingTime * TIME_SCORE;
-                this.popUp_nextMsg.textContent = `Final Score: ${this.user.score}`;
+                this.popUp_nextMsg.textContent = `${ProgressMsg.final} ${this.user.score}`;
                 this.popUp_btnIcon.classList.remove('fa-play'); 
                 this.popUp_btnIcon.classList.remove('fa-stop'); 
                 this.popUp_btnIcon.classList.add('fa-undo'); 
                 break;
-            case 'end':
-                this.popUp_nextMsg.textContent = `Score: ${this.user.score}`;
+            case Progress.stop:
+                this.popUp_nextMsg.textContent = `${ProgressMsg.stop} ${this.user.score}`;
                 this.popUp_btnIcon.classList.remove('fa-play'); 
                 this.popUp_btnIcon.classList.remove('fa-undo'); 
                 this.popUp_btnIcon.classList.add('fa-stop');

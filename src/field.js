@@ -3,6 +3,11 @@ const FIELD_WIDTH = 800;
 const FIELD_HEIGHT = 250
 const SCORE = 100;
 
+export const ItemType = Object.freeze({
+    vegetable: 'vegetable',
+    bug: 'bug',
+});
+
 export class Field{
     constructor(LEVEL, user){
         this.field = document.querySelector('.play__field');
@@ -17,10 +22,10 @@ export class Field{
         this.field.innerHTML = '';
 
         const vegetableCount = this._divideItem(this.LEVEL[this.user.level].VEGETABLE_COUNT, 3);
-        this._addItem('vegetable', vegetableCount[0], '../images/vegetable1.png');
-        this._addItem('vegetable', vegetableCount[1], '../images/vegetable2.png');
-        this._addItem('vegetable', vegetableCount[2], '../images/vegetable3.png');
-        this._addItem('bug', this.LEVEL[this.user.level].BUG_COUNT, 'images/bug.png');
+        this._addItem(ItemType.vegetable, vegetableCount[0], '../images/vegetable1.png');
+        this._addItem(ItemType.vegetable, vegetableCount[1], '../images/vegetable2.png');
+        this._addItem(ItemType.vegetable, vegetableCount[2], '../images/vegetable3.png');
+        this._addItem(ItemType.bug, this.LEVEL[this.user.level].BUG_COUNT, 'images/bug.png');
     }
 
     stop(state){
@@ -81,12 +86,12 @@ export class Field{
     }
 
     onClick = e => {
-        if(e.target.getAttribute('class') === 'vegetable'){
+        if(e.target.getAttribute('class') === ItemType.vegetable){
             e.target.remove();
             this.user.score += SCORE;
-            this.onItemClick && this.onItemClick('vegetable'); 
-        }else if(e.target.getAttribute('class') === 'bug'){
-            this.onItemClick && this.onItemClick('bug'); 
+            this.onItemClick && this.onItemClick(ItemType.vegetable); 
+        }else if(e.target.getAttribute('class') === ItemType.bug){
+            this.onItemClick && this.onItemClick(ItemType.bug); 
         }else{
             return;
         }

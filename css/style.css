@@ -25,6 +25,7 @@ body {
   align-items: center;
   visibility: hidden;
   opacity: 0;
+  position: relative;
 }
 .game__title,
 .game__rank {
@@ -107,6 +108,28 @@ body {
 }
 .start__btn:hover {
   opacity: 1;
+}
+.game__bgm {
+  position: absolute;
+  right: 20px;
+  top: 30px;
+}
+.bgmBtn {
+  font-family: "Montserrat", sans-serif;
+  background: transparent;
+  outline: none;
+  width: 100px;
+  height: 30px;
+  color: black;
+  font-size: 16px;
+}
+.bgmIco {
+  font-size: 15px;
+  margin-left: 10px;
+  color: black;
+}
+.bgm {
+  display: none;
 }
 /* game__startScreen end */
 
@@ -289,4 +312,5 @@ body {
     transform: translateY(0px);
   }
 }
+
 /* loading end */

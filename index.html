@@ -17,7 +17,7 @@
 <body>
     <div class="container">
         <div class="loading">
-            <h2 class="loading__text">Game Loading...</h2>
+            <h2 class="loading__text"></h2>
         </div>
         <section class="game__startScreen">
             <h1 class="game__title">Vegetable Garden</h1>
@@ -32,6 +32,12 @@
             <div class="game__start">
                 <input type="text" class="start__user" placeholder="닉네임을 입력하세요">
                 <button class="start__btn">GAME START</button>
+            </div>
+            <div class="game__bgm">
+                <button class="bgmBtn">BGM</button>
+                <audio controls loop preload="auto" class="bgm">
+                    <source src="sound/bg.mp3" type="audio/ogg">
+                </audio>
             </div>
         </section>
         <section class="game__content">
