@@ -1,6 +1,7 @@
 const VEGETABLE_SIZE = 70;
 const FIELD_WIDTH = 800;
 const FIELD_HEIGHT = 250
+const SCORE = 100;
 
 export class Field{
     constructor(LEVEL, user){
@@ -82,6 +83,7 @@ export class Field{
     onClick = e => {
         if(e.target.getAttribute('class') === 'vegetable'){
             e.target.remove();
+            this.user.score += SCORE;
             this.onItemClick && this.onItemClick('vegetable'); 
         }else if(e.target.getAttribute('class') === 'bug'){
             this.onItemClick && this.onItemClick('bug'); 

@@ -1,4 +1,5 @@
 const STANBY_TIME = 5;
+const TIME_SCORE = 20;
 
 export class PopUp{
     constructor(user){
@@ -10,6 +11,7 @@ export class PopUp{
         this.popUp_stanBy = document.querySelector('.pop-up__stanBy')
         this.stanByCounter = document.querySelector('.stanBy__counter');
         this.stanByTimerId = 0;
+        this.remainingTime = 0;
         this.user = user;
 
         this.popUp_btnIcon.addEventListener('click',this.onClick);
@@ -34,18 +36,24 @@ export class PopUp{
         this.setPlayTimer = setPlayTimer;
     }
 
+    setRemainingTime(remainingTime){
+        this.remainingTime = remainingTime;
+    }
+
     showFinishText(msg, nextMsg){
         this.showFinish();
         this.popUp_finishMsg.textContent = msg;
-    
         switch(nextMsg){
             case 'next':
+                this.user.level++;
+                this.user.score += this.remainingTime * TIME_SCORE;
                 this.popUp_nextMsg.textContent = `Next Level ${this.user.level}`;
                 this.popUp_btnIcon.classList.remove('fa-undo'); 
                 this.popUp_btnIcon.classList.remove('fa-stop'); 
                 this.popUp_btnIcon.classList.add('fa-play'); 
                 break;
             case 'final':
+                this.user.score += this.remainingTime * TIME_SCORE;
                 this.popUp_nextMsg.textContent = `Final Score: ${this.user.score}`;
                 this.popUp_btnIcon.classList.remove('fa-play'); 
                 this.popUp_btnIcon.classList.remove('fa-stop'); 

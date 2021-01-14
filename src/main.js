@@ -1,10 +1,10 @@
 'use strict';
 
 import { CountUp } from '../dist/countUp.min.js';
-import RankRepository from '../service/rank_repository.js';
 import { fadeIn, fadeOut } from './fade.js';
 import { Field } from './field.js';
 import { PopUp } from './popUp.js';
+import Rank from './rank.js';
 import * as sound from './sound.js';
 
 const startScreen = document.querySelector(".game__startScreen");
@@ -17,31 +17,26 @@ const userLevel = document.querySelector('.user__level');
 const info_timeout = document.querySelector('.info__timeout');
 const info_count = document.querySelector('.info__count');
 
-const rankList = document.querySelector('.rank__list');
 const loadingScreen = document.querySelector('.loading');
 const playField = document.querySelector('.play__field');
 
-const ITEM_SCORE = 100;
-const TIME_SCORE = 12;
-
 const scoreUp = new CountUp('user__score', 0, { duration: 0.5, useEasing: false });
-const rankRepository = new RankRepository();
 
 const LEVEL = {
     1 : {
-        VEGETABLE_COUNT: 10,
-        BUG_COUNT: 10,
-        TIMEOUT : 30,
+        VEGETABLE_COUNT: 5,
+        BUG_COUNT: 5,
+        TIMEOUT : 10,
     },
     2 : {
-        VEGETABLE_COUNT: 15,
-        BUG_COUNT: 15,
-        TIMEOUT : 45,
+        VEGETABLE_COUNT: 5,
+        BUG_COUNT: 5,
+        TIMEOUT : 10,
     },
     3 : {
-        VEGETABLE_COUNT: 20,
-        BUG_COUNT: 20,
-        TIMEOUT : 60,
+        VEGETABLE_COUNT: 5,
+        BUG_COUNT: 5,
+        TIMEOUT : 10,
     },
 
 }
@@ -58,7 +53,6 @@ let user = {
     level : 1,
     rank: 100,
 };
-let rankUser = [];
 
 window.addEventListener('load', () => {
     hideLoading();
@@ -66,6 +60,7 @@ window.addEventListener('load', () => {
 
 const field = new Field(LEVEL, user);
 const popup = new PopUp(user);
+const rank = new Rank();
 
 field.setClickListener(onItemClick);
 popup.setClickListener(onPopUpClick);
@@ -73,7 +68,6 @@ popup.setPlayTimerListener(setPlayTimer);
 
 startBtn.addEventListener("click", startGame);
 scoreUp.start();
-
 function setPlayTimer(){
     playField.style.pointerEvents = 'visible';
     playTimer();
@@ -83,7 +77,7 @@ function onPopUpClick(state){
     if(state === 'play'){
         goToNextStage();
     }else{
-        calcRank();
+        rank.calc(user);
         showStartScreen(playScreen);
     }
 }
@@ -92,96 +86,12 @@ function onItemClick(itemType){
     if(itemType === 'vegetable'){
         sound.playVegetable();
         updateCountText();
-        updateScoreText(ITEM_SCORE);
+        updateScoreText();
     }else{
         sound.playBug();
         clearInterval(timerId);
         finishGame(0, 'Game End : Bug Catch !');
     }
-}
-
-function updateRankText(){
-    rankList.innerHTML = '';
-    let list = rankUser.length <= 6 ? rankUser.length : 6;
-    for(let i = 0; i < list; i++){
-        let tropy = '';
-        switch(rankUser[i].rank){
-            case 1: 
-                tropy = 'tropy__gold';
-                break;
-            case 2:
-                tropy = 'tropy__silver';
-                break;
-            case 3:
-                tropy = 'tropy__bronze';
-                break;
-            default:
-                tropy = 'tropy__empty';
-                break;
-        }
-
-        const tr = document.createElement('tr');
-        tr.classList.add('rank__number');
-        tr.innerHTML = `
-        <td>
-            <span class="material-icons ${tropy}">emoji_events</span>
-            <span class="rank__id">${rankUser[i].id}</span>
-        </td>
-        <td>
-            <span class="rank__score">${rankUser[i].score}</span>
-        </td>
-        `;
-
-        rankList.appendChild(tr);
-    }
-    
-}
-
-function updateRank(users){
-    rankRepository.updateRank(users);
-}
-
-function removeRank(users){
-    rankRepository.removeRank(users);
-}
-
-function setRankUser(users){
-    rankUser = [];
-    for(let key of Object.keys(users)){
-        rankUser.push({'id':users[key].id, 'pid':users[key].pid ,'score':users[key].score});
-    }
-    sortRank();
-    updateRankText();
-}
-
-function sortRank(){
-    if(rankUser.length < 1){
-        return;
-    }
-    rankUser = rankUser.sort((a, b) => b.score - a.score);
-    let max = rankUser[0].score;
-    let rank = 1;
-    
-    for(let i = 0; i < rankUser.length; i++){
-        if(rankUser[i].score >= max){
-            rankUser[i].rank = rank;
-        }else{
-            rank++;
-            rankUser[i].rank = rank;
-            max = rankUser[i].score;
-        }
-    }
-}
-
-function readRank(){
-    let stopSync = rankRepository.getRank(users => {
-        setRankUser(users);
-    });
-    return () => stopSync();
-}
-
-function rankInit(){
-    rankRepository.init();
 }
 
 function startGame() {
@@ -201,28 +111,21 @@ function init(){
 function finishGame(result, msg){
     field.stop(false);
     playField.style.pointerEvents = 'none';
+    
+    setTimeout(() => {
+        updateScoreText();
+    }, 1000);
+    popup.setRemainingTime(remainingTime);
 
     if(result && user.level !== 3){
-        addTimeScore();
-        user.level++;
         popup.showFinishText(msg, 'next');
     }else if(result && user.level === 3){
-        addTimeScore();
         popup.showFinishText(msg, 'final');
     }else{
         popup.showFinishText(msg, 'end');
     }
 }
 
-function calcRank(){
-    rankUser.push(user);
-    sortRank();
-    const newRankUser = rankUser.filter(rankUser => rankUser.pid === user.pid);
-    if(newRankUser[0].rank <= 3){
-        rankUser = rankUser.filter(rankUser => rankUser.rank <= 3);
-        updateRank(rankUser);
-    }
-}
 
 function goToNextStage(){
     init();
@@ -241,14 +144,7 @@ function playTimer(){
     }, 1000);
 }
 
-function addTimeScore(){
-    setTimeout(() => {
-        updateScoreText(remainingTime * TIME_SCORE);
-    }, 1000);
-}
-
-function updateScoreText(score){
-    user.score += score;
+function updateScoreText(){
     scoreUp.update(user.score);
 }
 
@@ -282,7 +178,7 @@ function updateTimerText(time){
 
 function hideLoading(){
     loading();
-    readRank();
+    rank.read();
     showStartScreen(loadingScreen);
 }
 
@@ -300,12 +196,6 @@ function showStartScreen(hide){
   setTimeout(() => {
     fadeIn(startScreen, 'flex');
   }, 1200);
-
-  if(rankUser.length > 6){
-    const outs = rankUser.filter(user => user.rank > 3);
-    removeRank(outs);
-}
-
 }
 
 function userInfoInit(){
