@@ -4,6 +4,7 @@ import { CountUp } from '../dist/countUp.min.js';
 import RankRepository from '../service/rank_repository.js';
 import { fadeIn, fadeOut } from './fade.js';
 import { Field } from './field.js';
+import { PopUp } from './popUp.js';
 import * as sound from './sound.js';
 
 const startScreen = document.querySelector(".game__startScreen");
@@ -16,19 +17,10 @@ const userLevel = document.querySelector('.user__level');
 const info_timeout = document.querySelector('.info__timeout');
 const info_count = document.querySelector('.info__count');
 
-const popUp = document.querySelector('.pop-up');
-const popUp_stanBy = document.querySelector('.pop-up__stanBy');
-const popUp_finish = document.querySelector('.pop-up__finish');
-const popUp_nextMsg = document.querySelector('.pop-up__nextMsg');
-const popUp_finishMsg = document.querySelector('.pop-up__finishMsg');
-const popUp_btnIcon = document.querySelector('.fas');
-const stanByCounter = document.querySelector('.stanBy__counter');
-
 const rankList = document.querySelector('.rank__list');
 const loadingScreen = document.querySelector('.loading');
 const playField = document.querySelector('.play__field');
 
-const STANBY_TIME = 5;
 const ITEM_SCORE = 100;
 const TIME_SCORE = 12;
 
@@ -56,7 +48,6 @@ const LEVEL = {
 
 let start = false;
 
-let stanByTimerId;
 let timerId;
 let removeItemCount;
 let remainingTime;
@@ -74,11 +65,28 @@ window.addEventListener('load', () => {
 })
 
 const field = new Field(LEVEL, user);
-popUp_btnIcon.addEventListener('click',onPopUpClick);
+const popup = new PopUp(user);
+
+field.setClickListener(onItemClick);
+popup.setClickListener(onPopUpClick);
+popup.setPlayTimerListener(setPlayTimer);
+
 startBtn.addEventListener("click", startGame);
 scoreUp.start();
 
-field.setClickListener(onItemClick);
+function setPlayTimer(){
+    playField.style.pointerEvents = 'visible';
+    playTimer();
+}
+
+function onPopUpClick(state){
+    if(state === 'play'){
+        goToNextStage();
+    }else{
+        calcRank();
+        showStartScreen(playScreen);
+    }
+}
 
 function onItemClick(itemType){
     if(itemType === 'vegetable'){
@@ -192,24 +200,17 @@ function init(){
 
 function finishGame(result, msg){
     field.stop(false);
-    showFinishPopUp();
+    playField.style.pointerEvents = 'none';
+
     if(result && user.level !== 3){
-        showFinishPopUpText(msg, 'next');
+        addTimeScore();
+        user.level++;
+        popup.showFinishText(msg, 'next');
     }else if(result && user.level === 3){
-        showFinishPopUpText(msg, 'final');
+        addTimeScore();
+        popup.showFinishText(msg, 'final');
     }else{
-        showFinishPopUpText(msg, 'end');
-    }
-}
-
-function onPopUpClick(e){
-    hideFinishPopUp();
-
-    if(e.currentTarget.matches('.fa-play')){
-        goToNextStage();
-    }else{
-        calcRank();
-        showStartScreen(playScreen);
+        popup.showFinishText(msg, 'end');
     }
 }
 
@@ -227,55 +228,6 @@ function goToNextStage(){
     init();
 }
 
-function showFinishPopUpText(msg, nextMsg){
-    popUp_finishMsg.textContent = msg;
-
-    switch(nextMsg){
-        case 'next':
-            addTimeScore();
-            user.level++;
-            popUp_nextMsg.textContent = `Next Level ${user.level}`;
-            popUp_btnIcon.classList.remove('fa-undo'); 
-            popUp_btnIcon.classList.remove('fa-stop'); 
-            popUp_btnIcon.classList.add('fa-play'); 
-            break;
-        case 'final':
-            addTimeScore();
-            popUp_nextMsg.textContent = `Final Score: ${user.score}`;
-            popUp_btnIcon.classList.remove('fa-play'); 
-            popUp_btnIcon.classList.remove('fa-stop'); 
-            popUp_btnIcon.classList.add('fa-undo'); 
-            break;
-        case 'end':
-            popUp_nextMsg.textContent = `Score: ${user.score}`;
-            popUp_btnIcon.classList.remove('fa-play'); 
-            popUp_btnIcon.classList.remove('fa-undo'); 
-            popUp_btnIcon.classList.add('fa-stop');
-            
-            break;
-    }
-}
-
-function addTimeScore(){
-    setTimeout(() => {
-        updateScoreText(remainingTime * TIME_SCORE);
-    }, 1000);
-}
-
-function showFinishPopUp(){
-    playField.style.pointerEvents = 'none';
-    popUp.style.display= 'block';
-    popUp_finish.style.display = 'block';
-}
-
-function hideFinishPopUp(){
-    playField.style.pointerEvents = 'visible';
-    popUp.style.display= 'none';
-    popUp_finish.style.display = 'none';
-}
-
-
-
 function playTimer(){
     remainingTime = LEVEL[user.level].TIMEOUT;
     timerId = setInterval(() => {
@@ -286,6 +238,12 @@ function playTimer(){
             clearInterval(timerId);
             finishGame(0, 'Game End : TimeOut !', null);
         }
+    }, 1000);
+}
+
+function addTimeScore(){
+    setTimeout(() => {
+        updateScoreText(remainingTime * TIME_SCORE);
     }, 1000);
 }
 
@@ -310,8 +268,6 @@ function updateGameInfo(){
     field.init();
 }
 
-
-
 function updateTimerText(time){
     let min = Math.floor(time / 60);
     let sec = time % 60;
@@ -323,10 +279,6 @@ function updateTimerText(time){
     }
     info_timeout.textContent = `${min}:${sec}`;
 }
-
-
-
-
 
 function hideLoading(){
     loading();
@@ -365,23 +317,8 @@ function userInfoInit(){
 }
 
 function playStanByTimer(){
-    let timeout = STANBY_TIME;
     playField.style.pointerEvents = 'none';
-    popUp.style.display = 'block';
-    popUp_stanBy.style.display = 'block';
-
-    stanByTimerId = setInterval(() => {
-        if(timeout > 0){
-            timeout--;
-            stanByCounter.textContent = timeout;
-        }else{
-            clearInterval(stanByTimerId);
-            playField.style.pointerEvents = 'visible';
-            popUp.style.display = 'none';
-            popUp_stanBy.style.display = 'none';
-            playTimer();
-        }
-    }, 1000);
+    popup.showStanBy();
 }
 
 function updateUserInfo(){
@@ -394,8 +331,6 @@ function updateUserInfo(){
     }
     userScore.textContent = user.score;
     userLevel.textContent = user.level;
-    
-    stanByCounter.textContent = STANBY_TIME;
 }
 
 function loading(){
