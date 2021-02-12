@@ -22,9 +22,9 @@ export class Field{
         this.field.innerHTML = '';
 
         const vegetableCount = this._divideItem(this.LEVEL[this.user.level].VEGETABLE_COUNT, 3);
-        this._addItem(ItemType.vegetable, vegetableCount[0], '../images/vegetable1.png');
-        this._addItem(ItemType.vegetable, vegetableCount[1], '../images/vegetable2.png');
-        this._addItem(ItemType.vegetable, vegetableCount[2], '../images/vegetable3.png');
+        this._addItem(ItemType.vegetable, vegetableCount[0], 'images/vegetable1.png');
+        this._addItem(ItemType.vegetable, vegetableCount[1], 'images/vegetable2.png');
+        this._addItem(ItemType.vegetable, vegetableCount[2], 'images/vegetable3.png');
         this._addItem(ItemType.bug, this.LEVEL[this.user.level].BUG_COUNT, 'images/bug.png');
     }
 

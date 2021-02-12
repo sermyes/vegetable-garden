@@ -288,7 +288,6 @@ export class Game {
   }
 
   onBgmClick = (e) => {
-    console.log(e.target.parentNode)
     if(e.target.textContent === 'volume_off'){
       e.target.parentNode.classList.add('play');
       this.playbgm = true;

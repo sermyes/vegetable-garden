@@ -1,8 +1,8 @@
-const vegetableSound = new Audio('../sound/vegetable_pull.mp3');
-const bugSound = new Audio('../sound/bug_pull.mp3');
-const winSound = new Audio('../sound/win.mp3');
-const alertSound = new Audio('../sound/alert.wav');
-const gameBgSound = new Audio('../sound/gameBg.mp3');
+const vegetableSound = new Audio('sound/vegetable_pull.mp3');
+const bugSound = new Audio('sound/bug_pull.mp3');
+const winSound = new Audio('sound/win.mp3');
+const alertSound = new Audio('sound/alert.wav');
+const gameBgSound = new Audio('sound/gameBg.mp3');
 
 export function playVegetable(){
     playSound(vegetableSound);
