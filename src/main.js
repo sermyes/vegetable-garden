@@ -1,5 +1,11 @@
 import { Game } from './game.js';
+import { loading } from './loading.js';
 
 const game = new Game();
-game.start();
+loading();
+
+window.onload = () => {
+    game.start();
+}
+
 
