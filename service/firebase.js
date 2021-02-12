@@ -1,9 +1,9 @@
-import { Process } from '../env.js';
 
 const firebaseConfig = {
-  apiKey: Process.ENV_API_KEY,
-  authDomain: Process.ENV_AUTH_DOMAIN,
-  projectId: Process.ENV_PROJECT_ID,
+  apiKey: "AIzaSyD9FrJ-bsNIIkl6ld52vucKIEoe2QzLJvo",
+  authDomain: "vegetable-game.firebaseapp.com",
+  databaseURL: "https://vegetable-game-default-rtdb.firebaseio.com",
+  projectId: "vegetable-game",
 };
 
 // Initialize Firebase

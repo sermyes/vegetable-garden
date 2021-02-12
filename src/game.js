@@ -55,6 +55,7 @@ export class Game {
     this.timerId;
     this.removeItemCount;
     this.remainingTime;
+    this.playbgm = false;
     this.user = {
       id: null,
       pid: 0,
@@ -113,8 +114,11 @@ export class Game {
   };
 
   onClick = () => {
-    this.stopBgm();
-    this.changeBgmIco();
+    if(this.playbgm === true){
+      this.stopBgm();
+      this.changeBgmIco();
+    }
+    
     this.scoreUp.reset();
     this.showPlayScreen(this.startScreen);
     this.userInfoInit();
@@ -275,19 +279,24 @@ export class Game {
   }
 
   setBgm(){
-    const i = document.createElement('i');
-    i.classList.add('bgmIco');
-    i.classList.add('fas');
-    i.classList.add('fa-play');
-    i.style.cursor = 'pointer';
-    this.bgmBtn.appendChild(i);
+    const span = document.createElement('span');
+    span.classList.add('bgmIco');
+    span.classList.add('material-icons');
+    span.innerText = 'volume_off';
+    span.style.cursor = 'pointer';
+    this.bgmBtn.appendChild(span);
   }
 
   onBgmClick = (e) => {
-    if(e.target.matches('.fa-play')){
+    console.log(e.target.parentNode)
+    if(e.target.textContent === 'volume_off'){
+      e.target.parentNode.classList.add('play');
+      this.playbgm = true;
       this.playBgm();
       this.changeBgmIco();
-    }else if(e.target.matches('.fa-stop')){
+    }else if(e.target.textContent === 'volume_up'){
+      e.target.parentNode.classList.remove('play');
+      this.playbgm = false;
       this.stopBgm();
       this.changeBgmIco();
     }
@@ -295,12 +304,10 @@ export class Game {
 
   changeBgmIco(){
     const bgmIco = document.querySelector('.bgmIco');
-    if(bgmIco.matches('.fa-play')){
-      bgmIco.classList.remove('fa-play');
-      bgmIco.classList.add('fa-stop');
-    }else if(bgmIco.matches('.fa-stop')){
-      bgmIco.classList.remove('fa-stop');
-      bgmIco.classList.add('fa-play');
+    if(bgmIco.textContent === 'volume_off'){
+      bgmIco.innerText = 'volume_up';
+    }else if(bgmIco.textContent === 'volume_up'){
+      bgmIco.innerText = 'volume_off';
     }
   }
 
@@ -310,5 +317,6 @@ export class Game {
   
   stopBgm(){
     this.bgm.pause();
+    this.bgm.currentTime = 0;
   }
 }

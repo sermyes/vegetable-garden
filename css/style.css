@@ -115,18 +115,25 @@ body {
   top: 30px;
 }
 .bgmBtn {
-  font-family: "Montserrat", sans-serif;
   background: transparent;
   outline: none;
-  width: 100px;
-  height: 30px;
-  color: black;
-  font-size: 16px;
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: rgba(43, 43, 43, 0.5);
+  border-left-color: rgba(43, 43, 43, 0.5);
+  border-right-color: rgba(43, 43, 43);
+  border-bottom-color: rgba(43, 43, 43);
+}
+.bgmBtn.play {
+  border-top-color: rgba(43, 43, 43);
+  border-left-color: rgba(43, 43, 43);
+  border-right-color: rgba(43, 43, 43, 0.5);
+  border-bottom-color: rgba(43, 43, 43, 0.5);
 }
 .bgmIco {
-  font-size: 15px;
-  margin-left: 10px;
-  color: black;
+  display: block;
+  font-size: 24px;
+  color: #000;
 }
 .bgm {
   display: none;
