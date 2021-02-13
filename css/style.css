@@ -18,7 +18,7 @@ body {
 }
 /* all using css */
 .game__startScreen {
-  background-image: url("../images/bg_startSrcreen.png");
+  background-image: url("../images/bg_startSrcreen.jpg");
   display: none;
   flex-direction: column;
   justify-content: space-around;
@@ -116,19 +116,8 @@ body {
 }
 .bgmBtn {
   background: transparent;
+  border: none;
   outline: none;
-  border-width: 2px;
-  border-style: solid;
-  border-top-color: rgba(43, 43, 43, 0.5);
-  border-left-color: rgba(43, 43, 43, 0.5);
-  border-right-color: rgba(43, 43, 43);
-  border-bottom-color: rgba(43, 43, 43);
-}
-.bgmBtn.play {
-  border-top-color: rgba(43, 43, 43);
-  border-left-color: rgba(43, 43, 43);
-  border-right-color: rgba(43, 43, 43, 0.5);
-  border-bottom-color: rgba(43, 43, 43, 0.5);
 }
 .bgmIco {
   display: block;
@@ -147,7 +136,7 @@ body {
   pointer-events: none;
 }
 .game__content {
-  background-image: url("../images/bg_play.png");
+  background-image: url("../images/bg_play.jpg");
   display: none;
   flex-direction: column;
   position: relative;

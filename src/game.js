@@ -262,12 +262,10 @@ export class Game {
 
   onBgmClick = (e) => {
     if(e.target.textContent === 'volume_off'){
-      e.target.parentNode.classList.add('play');
       this.playbgm = true;
       this.playBgm();
       this.changeBgmIco();
     }else if(e.target.textContent === 'volume_up'){
-      e.target.parentNode.classList.remove('play');
       this.playbgm = false;
       this.stopBgm();
       this.changeBgmIco();
