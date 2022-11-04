@@ -1,12 +1,13 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js';
+import * as FIREBASE from '../env.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD9FrJ-bsNIIkl6ld52vucKIEoe2QzLJvo",
-  authDomain: "vegetable-game.firebaseapp.com",
-  databaseURL: "https://vegetable-game-default-rtdb.firebaseio.com",
-  projectId: "vegetable-game",
+  apiKey: FIREBASE.API_KEY,
+  databaseURL: FIREBASE.DB_URL,
+  projectId: FIREBASE.PROJECT_ID
 };
 
 // Initialize Firebase
-const firebaseApp = firebase.initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
 
 export default firebaseApp;

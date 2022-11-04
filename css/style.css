@@ -1,5 +1,5 @@
 body {
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: 'Noto Sans SC', sans-serif;
   padding-top: 100px;
 }
 .container {
@@ -7,6 +7,8 @@ body {
   height: 500px;
   margin: 0 auto;
   position: relative;
+  border: 3px solid lightgrey;
+  border-radius: 5px;
 }
 .game__startScreen,
 .game__content {
@@ -15,10 +17,11 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  border-radius: 5px;
 }
 /* all using css */
 .game__startScreen {
-  background-image: url("../images/bg_startSrcreen.jpg");
+  background-image: url('../images/bg_startSrcreen.jpg');
   display: none;
   flex-direction: column;
   justify-content: space-around;
@@ -32,7 +35,7 @@ body {
   pointer-events: none;
 }
 .game__title {
-  font-family: "Lobster", cursive;
+  font-family: 'Lobster', cursive;
   font-size: 42px;
 }
 .game__rank caption {
@@ -136,7 +139,7 @@ body {
   pointer-events: none;
 }
 .game__content {
-  background-image: url("../images/bg_play.jpg");
+  background-image: url('../images/bg_play.jpg');
   display: none;
   flex-direction: column;
   position: relative;

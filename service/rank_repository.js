@@ -1,34 +1,46 @@
 import firebaseApp from './firebase.js';
+import {
+  getDatabase,
+  ref,
+  update,
+  remove,
+  onValue,
+  off
+} from 'https://www.gstatic.com/firebasejs/9.13.0/firebase-database.js';
 
-class RankRepository{
-    updateRank(users){
-        for(let i = 0; i < users.length; i++){
-            firebaseApp.database().ref(`rank/${users[i].pid}`).update({
-                id: users[i].id,
-                pid: users[i].pid,
-                score: users[i].score,
-            });
-        }
+class RankRepository {
+  constructor() {
+    this.database = getDatabase(firebaseApp);
+  }
+  updateRank(users) {
+    for (let i = 0; i < users.length; i++) {
+      update(ref(this.database, `rank/${users[i].pid}`), {
+        id: users[i].id,
+        pid: users[i].pid,
+        score: users[i].score
+      });
     }
+  }
 
-    getRank(onRead){
-        const ref = firebaseApp.database().ref(`rank`);
-        ref.on('value', snapshot => {
-            snapshot.val() && onRead(snapshot.val());
+  getRank(onRead) {
+    const query = ref(this.database, `rank`);
+    onValue(query, snapshot => {
+      const value = snapshot.val();
+      value && onRead(value);
+    });
 
-            return () => ref.off();
-        });
+    return () => off(query);
+  }
+
+  removeRank(users) {
+    for (let i = 0; i < users.length; i++) {
+      remove(ref(this.database, `rank/${users[i].pid}`));
     }
+  }
 
-    removeRank(users){
-        for(let i = 0; i < users.length; i++){
-            firebaseApp.database().ref(`rank/${users[i].pid}`).remove();
-        }
-    }
-
-    init(){
-        firebaseApp.database().ref(`rank`).remove();
-    }
+  init() {
+    remove(ref(this.database, `rank`));
+  }
 }
 
 export default RankRepository;
