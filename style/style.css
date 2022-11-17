@@ -9,6 +9,7 @@ body {
   position: relative;
   border: 3px solid lightgrey;
   border-radius: 5px;
+  overflow: hidden;
 }
 .game__startScreen,
 .game__content {
@@ -21,7 +22,7 @@ body {
 }
 /* all using css */
 .game__startScreen {
-  background-image: url('../images/bg_startSrcreen.jpg');
+  background-image: url('../assets/images/bg_startSrcreen.jpg');
   display: none;
   flex-direction: column;
   justify-content: space-around;
@@ -139,7 +140,7 @@ body {
   pointer-events: none;
 }
 .game__content {
-  background-image: url('../images/bg_play.jpg');
+  background-image: url('../assets/images/bg_play.jpg');
   display: none;
   flex-direction: column;
   position: relative;

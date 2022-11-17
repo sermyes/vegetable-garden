@@ -1,7 +1,12 @@
-import { Game } from './game.js';
+import { GameBuilder } from './game.js';
 import { loading } from './loading.js';
 
-const game = new Game();
+const game = new GameBuilder()
+  .steps(4)
+  .vegetableCount()
+  .bugCount()
+  .duration()
+  .build();
 
 loading();
 

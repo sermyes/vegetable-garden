@@ -1,106 +1,110 @@
-import RankRepository from '../service/rank_repository.js';
+import RankRepository from './service/rank_repository.js';
 
-export default class Rank{
-    constructor(){
-        this.rankList = document.querySelector('.rank__list');
-        this.rankRepository = new RankRepository();
-        this.rankUser = [];
-    }
+export default class Rank {
+  constructor() {
+    this.list = document.querySelector('.rank__list');
+    this.repository = new RankRepository();
+    this.users = [];
+  }
 
-    update(users){
-        this.rankRepository.updateRank(users);
-    }
-    
-    remove(users){
-        this.rankRepository.removeRank(users);
-    }
-    
-    setUser(users){
-        this.rankUser = [];
-        for(let key of Object.keys(users)){
-            this.rankUser.push({'id':users[key].id, 'pid':users[key].pid ,'score':users[key].score});
-        }
-        this.sort();
-        this.updateText();
-    }
-    
-    sort(){
-        if(this.rankUser.length < 1){
-            return;
-        }
-        this.rankUser = this.rankUser.sort((a, b) => b.score - a.score);
-        let max = this.rankUser[0].score;
-        let rank = 1;
-        
-        for(let i = 0; i < this.rankUser.length; i++){
-            if(this.rankUser[i].score >= max){
-                this.rankUser[i].rank = rank;
-            }else{
-                rank++;
-                this.rankUser[i].rank = rank;
-                max = this.rankUser[i].score;
-            }
-        }
-    }
-    
-    read(){
-        let stopSync = this.rankRepository.getRank(users => {
-            this.setUser(users);
-        });
-        return () => stopSync();
-    }
-    
-    init(){
-        this.rankRepository.init();
-    }
+  update(users) {
+    this.repository.updateRank(users);
+  }
 
-    calc(user){
-        this.rankUser.push(user);
-        this.sort();
-        const newRankUser = this.rankUser.filter(rankUser => rankUser.pid === user.pid);
-        if(newRankUser[0].rank <= 3){
-            this.rankUser = this.rankUser.filter(rankUser => rankUser.rank <= 3);
-            this.update(this.rankUser);
-        }
-        if(this.rankUser.length > 6){
-            const outs = this.rankUser.filter(user => user.rank > 3);
-            this.remove(outs);
-        }
-    }
+  remove(users) {
+    this.repository.removeRank(users);
+  }
 
-    updateText(){
-        this.rankList.innerHTML = '';
-        let list = this.rankUser.length <= 6 ? this.rankUser.length : 6;
-        for(let i = 0; i < list; i++){
-            let tropy = '';
-            switch(this.rankUser[i].rank){
-                case 1: 
-                    tropy = 'tropy__gold';
-                    break;
-                case 2:
-                    tropy = 'tropy__silver';
-                    break;
-                case 3:
-                    tropy = 'tropy__bronze';
-                    break;
-                default:
-                    tropy = 'tropy__empty';
-                    break;
-            }
-    
-            const tr = document.createElement('tr');
-            tr.classList.add('rank__number');
-            tr.innerHTML = `
+  setUser(userList) {
+    this.users = [];
+    for (let key of Object.keys(userList)) {
+      this.users.push({
+        id: userList[key].id,
+        pid: userList[key].pid,
+        score: userList[key].score
+      });
+    }
+    this.sort();
+    this.updateText();
+  }
+
+  sort() {
+    if (this.users.length < 1) {
+      return;
+    }
+    this.users = this.users.sort((a, b) => b.score - a.score);
+    let max = this.users[0].score;
+    let rank = 1;
+
+    for (let i = 0; i < this.users.length; i++) {
+      if (this.users[i].score >= max) {
+        this.users[i].rank = rank;
+      } else {
+        rank++;
+        this.users[i].rank = rank;
+        max = this.users[i].score;
+      }
+    }
+  }
+
+  read() {
+    let stopSync = this.repository.getRank(users => {
+      this.setUser(users);
+    });
+    return () => stopSync();
+  }
+
+  init() {
+    this.repository.init();
+  }
+
+  calc(user) {
+    this.users.push(user);
+    this.sort();
+    const newusers = this.users.filter(users => users.pid === user.pid);
+    if (newusers[0].rank <= 3) {
+      this.users = this.users.filter(users => users.rank <= 3);
+      this.update(this.users);
+    }
+    if (this.users.length > 6) {
+      const outs = this.users.filter(user => user.rank > 3);
+      this.remove(outs);
+    }
+  }
+
+  updateText() {
+    this.list.innerHTML = '';
+    let list = this.users.length <= 6 ? this.users.length : 6;
+    for (let i = 0; i < list; i++) {
+      let tropy = '';
+      switch (this.users[i].rank) {
+        case 1:
+          tropy = 'tropy__gold';
+          break;
+        case 2:
+          tropy = 'tropy__silver';
+          break;
+        case 3:
+          tropy = 'tropy__bronze';
+          break;
+        default:
+          tropy = 'tropy__empty';
+          break;
+      }
+
+      const tr = document.createElement('tr');
+      tr.classList.add('rank__number');
+      tr.innerHTML = `
             <td>
                 <span class="material-icons ${tropy}">emoji_events</span>
-                <span class="rank__id">${this.rankUser[i].id}</span>
+                <span class="rank__id">${this.users[i].id}</span>
             </td>
             <td>
-                <span class="rank__score">${this.rankUser[i].score}</span>
+                <span class="rank__score">${this.users[i].score}</span>
             </td>
             `;
-    
-            this.rankList.appendChild(tr);
-        }
+
+      this.list.appendChild(tr);
     }
+  }
 }

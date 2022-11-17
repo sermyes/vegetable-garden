@@ -16,26 +16,59 @@ const ReasonMsg = Object.freeze({
   stopBug: 'Game End : Bug Catch !'
 });
 
-const LEVEL = {
-  1: {
-    VEGETABLE_COUNT: 10,
-    BUG_COUNT: 10,
-    TIMEOUT: 15
-  },
-  2: {
-    VEGETABLE_COUNT: 15,
-    BUG_COUNT: 15,
-    TIMEOUT: 25
-  },
-  3: {
-    VEGETABLE_COUNT: 20,
-    BUG_COUNT: 20,
-    TIMEOUT: 35
+export class GameBuilder {
+  _defaultValue = [3];
+  _defaultDuration = [5];
+
+  steps(num) {
+    if (num < 1) {
+      throw new Error('Stage must be 1 or higher');
+    }
+    this.steps = num;
+    return this;
   }
-};
+
+  vegetableCount(...num) {
+    this.vegetableCount = num.length >= 1 ? num : this._defaultValue;
+    return this;
+  }
+
+  bugCount(...num) {
+    this.bugCount = num.length >= 1 ? num : this._defaultValue;
+    return this;
+  }
+
+  duration(...duration) {
+    this.duration = duration.length >= 1 ? duration : this._defaultDuration;
+    return this;
+  }
+
+  build() {
+    const stages = {};
+    for (let i = 1; i <= this.steps; i++) {
+      const vegetableCount = this.vegetableCount[i - 1]
+        ? this.vegetableCount[i - 1]
+        : this.vegetableCount[0] * i;
+      const bugCount = this.bugCount[i - 1]
+        ? this.bugCount[i - 1]
+        : this.bugCount[0] * i;
+      const duration = this.duration[i - 1]
+        ? this.duration[i - 1]
+        : this.duration[0] * i;
+
+      stages[i] = {
+        VEGETABLE_COUNT: vegetableCount,
+        BUG_COUNT: bugCount,
+        TIMEOUT: duration
+      };
+    }
+
+    return new Game(stages);
+  }
+}
 
 export class Game {
-  constructor() {
+  constructor(stages) {
     this.startScreen = document.querySelector('.game__startScreen');
     this.playScreen = document.querySelector('.game__content');
     this.startBtn = document.querySelector('.start__btn');
@@ -51,24 +84,21 @@ export class Game {
     this.bgmBtn = document.querySelector('.bgmBtn');
     this.bgm = document.querySelector('.bgm');
 
+    this.stages = stages;
+    this.maxStages = Object.keys(stages).length;
     this.started = false;
     this.timerId;
     this.removeItemCount;
     this.remainingTime;
     this.playbgm = false;
-    this.user = {
-      id: null,
-      pid: 0,
-      score: 0,
-      level: 1,
-      rank: 100
-    };
+    this.user = this._createUser();
 
     this.scoreUp = new CountUp('user__score', 0, {
       duration: 0.5,
       useEasing: false
     });
-    this.field = new Field(LEVEL, this.user);
+
+    this.field = new Field(this.stages, this.user);
     this.popup = new PopUp(this.user);
     this.rank = new Rank();
 
@@ -78,6 +108,16 @@ export class Game {
     this.popup.setPlayTimerListener(this.setPlayTimer);
     this.startBtn.addEventListener('click', this.onClick);
     this.bgmBtn.addEventListener('click', this.onBgmClick);
+  }
+
+  _createUser() {
+    return {
+      id: null,
+      pid: 0,
+      score: 0,
+      level: 1,
+      rank: 100
+    };
   }
 
   start() {
@@ -134,17 +174,16 @@ export class Game {
 
   finishGame(result, msg) {
     sound.stopGameBg();
-    this.field.stop(false);
+    this.field.stop();
     this.playField.style.pointerEvents = 'none';
 
     setTimeout(() => {
       this.updateScoreText();
     }, 1000);
     this.popup.setRemainingTime(this.remainingTime);
-
-    if (result && this.user.level !== 3) {
+    if (result && this.user.level < this.maxStages) {
       this.popup.showFinishText(msg, Progress.next);
-    } else if (result && this.user.level === 3) {
+    } else if (result && this.user.level === this.maxStages) {
       this.popup.showFinishText(msg, Progress.final);
     } else {
       this.popup.showFinishText(msg, Progress.stop);
@@ -161,7 +200,7 @@ export class Game {
   }
 
   playTimer() {
-    this.remainingTime = LEVEL[this.user.level].TIMEOUT;
+    this.remainingTime = this.stages[this.user.level].TIMEOUT;
     this.timerId = setInterval(() => {
       if (this.remainingTime > 0) {
         this.remainingTime--;
@@ -181,8 +220,8 @@ export class Game {
   updateCountText() {
     this.removeItemCount++;
     this.info_count.textContent =
-      LEVEL[this.user.level].VEGETABLE_COUNT - this.removeItemCount;
-    if (LEVEL[this.user.level].VEGETABLE_COUNT === this.removeItemCount) {
+      this.stages[this.user.level].VEGETABLE_COUNT - this.removeItemCount;
+    if (this.stages[this.user.level].VEGETABLE_COUNT === this.removeItemCount) {
       clearInterval(this.timerId);
       sound.playWin();
       this.finishGame(Result.clear, ReasonMsg.clear);
@@ -190,8 +229,8 @@ export class Game {
   }
 
   updateGameInfo() {
-    this.info_count.textContent = LEVEL[this.user.level].VEGETABLE_COUNT;
-    this.updateTimerText(LEVEL[this.user.level].TIMEOUT);
+    this.info_count.textContent = this.stages[this.user.level].VEGETABLE_COUNT;
+    this.updateTimerText(this.stages[this.user.level].TIMEOUT);
     this.removeItemCount = 0;
     this.field.init();
   }
